@@ -3,6 +3,7 @@ import cors from '@fastify/cors'
 import { presentationRoutes } from './routes/presentations.js'
 import { agentRoutes } from './routes/agent.js'
 import { exportRoutes } from './routes/exports.js'
+import { designRoutes } from './routes/design.js'
 
 export async function createServer(port = 3001) {
   const fastify = Fastify({ logger: true })
@@ -15,6 +16,7 @@ export async function createServer(port = 3001) {
   fastify.register(presentationRoutes, { prefix: '/api' })
   fastify.register(agentRoutes, { prefix: '/api' })
   fastify.register(exportRoutes, { prefix: '/api' })
+  fastify.register(designRoutes, { prefix: '/api' })
 
   fastify.get('/health', async () => ({ status: 'ok' }))
 

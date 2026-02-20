@@ -16,3 +16,9 @@ export interface Presentation {
   createdAt: string
   updatedAt: string
 }
+
+export type DesignLibrary = 'auto' | 'tailwind' | 'bootstrap' | 'bulma' | 'pico' | 'none'
+
+export interface DesignConfig {
+  library: DesignLibrary
+}

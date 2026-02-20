@@ -118,4 +118,18 @@ export default function slideclawPlugin(api: OpenClawAPI) {
       body: JSON.stringify({ slideIds }),
     })
   })
+
+  // Get the current design config and available library catalog
+  api.registerGatewayMethod('slideclaw.getDesignConfig', async () => {
+    return request('/design-config')
+  })
+
+  // Set the preferred CSS library for slide generation
+  api.registerGatewayMethod('slideclaw.setDesignConfig', async (params) => {
+    const { library } = params as { library: string }
+    return request('/design-config', {
+      method: 'PUT',
+      body: JSON.stringify({ library }),
+    })
+  })
 }

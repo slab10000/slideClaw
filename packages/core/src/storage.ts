@@ -2,9 +2,11 @@ import fs from 'fs/promises'
 import path from 'path'
 import os from 'os'
 import { nanoid } from 'nanoid'
-import type { Presentation } from './types.js'
+import type { Presentation, DesignConfig } from './types.js'
 
-const SLIDECLAW_DIR = path.join(os.homedir(), '.slideclaw', 'presentations')
+const SLIDECLAW_ROOT = path.join(os.homedir(), '.slideclaw')
+const SLIDECLAW_DIR = path.join(SLIDECLAW_ROOT, 'presentations')
+const DESIGN_CONFIG_PATH = path.join(SLIDECLAW_ROOT, 'design-config.json')
 
 async function ensureDir(): Promise<void> {
   await fs.mkdir(SLIDECLAW_DIR, { recursive: true })
@@ -66,4 +68,19 @@ export function createId(): string {
 
 export function now(): string {
   return new Date().toISOString()
+}
+
+export async function getDesignConfig(): Promise<DesignConfig> {
+  try {
+    const content = await fs.readFile(DESIGN_CONFIG_PATH, 'utf-8')
+    return JSON.parse(content) as DesignConfig
+  } catch {
+    return { library: 'auto' }
+  }
+}
+
+export async function saveDesignConfig(config: DesignConfig): Promise<DesignConfig> {
+  await fs.mkdir(SLIDECLAW_ROOT, { recursive: true })
+  await fs.writeFile(DESIGN_CONFIG_PATH, JSON.stringify(config, null, 2), 'utf-8')
+  return config
 }
