@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "AI-powered local-first presentation tool",
   "scripts": {
-    "dev": "concurrently \"pnpm --filter @slideclaw/server dev\" \"pnpm --filter @slideclaw/web dev\"",
+    "dev": "pnpm --filter @slideclaw/core build && concurrently \"pnpm --filter @slideclaw/server dev\" \"pnpm --filter @slideclaw/web dev\"",
     "build": "pnpm --filter @slideclaw/core build && pnpm --filter @slideclaw/server build && pnpm --filter @slideclaw/web build && pnpm --filter @slideclaw/cli build",
     "lint": "pnpm -r lint"
   },
