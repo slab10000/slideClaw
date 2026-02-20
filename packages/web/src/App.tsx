@@ -5,6 +5,7 @@ import { SlideList } from './components/SlideList'
 import { SlidePreview } from './components/SlidePreview'
 import { GenerateBar } from './components/GenerateBar'
 import { PresentationList } from './components/PresentationList'
+import { NewPresentationModal } from './components/NewPresentationModal'
 import './App.css'
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPresentationList, setShowPresentationList] = useState(false)
+  const [showNewModal, setShowNewModal] = useState(false)
 
   const selectedSlide = currentPresentation?.slides.find(s => s.id === selectedSlideId) ?? null
 
@@ -57,11 +59,10 @@ export default function App() {
     }
   }
 
-  async function handleCreatePresentation() {
-    const title = prompt('Presentation title:')
-    if (!title) return
+  async function handleCreatePresentation(title: string, description: string) {
+    setShowNewModal(false)
     try {
-      const p = await api.createPresentation(title)
+      const p = await api.createPresentation(title, description || undefined)
       await loadPresentations()
       await loadPresentation(p.id)
     } catch (e) {
@@ -145,7 +146,7 @@ export default function App() {
             presentations={presentations}
             selectedId={currentPresentation?.id ?? null}
             onSelect={id => { loadPresentation(id); setShowPresentationList(false) }}
-            onCreate={handleCreatePresentation}
+            onCreate={() => setShowNewModal(true)}
             onDelete={handleDeletePresentation}
           />
         </div>
@@ -179,7 +180,7 @@ export default function App() {
             <h2>Welcome to slideClaw</h2>
             <p>Create AI-powered presentations where every slide is a full HTML document.</p>
             <div className="welcome-actions">
-              <button className="btn btn-primary" onClick={handleCreatePresentation}>
+              <button className="btn btn-primary" onClick={() => setShowNewModal(true)}>
                 Create Presentation
               </button>
               {presentations.length > 0 && (
@@ -199,6 +200,13 @@ export default function App() {
           isGenerating={isGenerating}
         />
       </footer>
+
+      {showNewModal && (
+        <NewPresentationModal
+          onConfirm={handleCreatePresentation}
+          onClose={() => setShowNewModal(false)}
+        />
+      )}
     </div>
   )
 }
