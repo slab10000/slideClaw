@@ -6,28 +6,39 @@ import {
   deletePresentation,
   createId,
   now,
+  getDesignConfig,
   type Presentation,
   type Slide,
 } from '@slideclaw/core'
+import { LIBRARY_CATALOG } from '../design-catalog.js'
 
 const SYSTEM_PROMPT = `You are an AI presentation designer for slideClaw.
 
-Your job is to create and manage beautiful HTML slide presentations. Each slide is a COMPLETE, SELF-CONTAINED HTML document.
+Your job is to create and manage beautiful, accessible HTML slide presentations. Each slide is a COMPLETE, SELF-CONTAINED HTML document.
 
 Rules for generating slides:
 1. Each slide MUST be a complete HTML document with <html>, <head>, and <body> tags
 2. Slides are rendered at exactly 1280×720px (16:9 aspect ratio)
 3. Set <html> and <body> styles to: margin: 0; padding: 0; width: 1280px; height: 720px; overflow: hidden;
-4. You MAY use CDN-loaded libraries: Chart.js (https://cdn.jsdelivr.net/npm/chart.js), Three.js (https://cdn.jsdelivr.net/npm/three), anime.js (https://cdn.jsdelivr.net/npm/animejs), Tailwind CSS (https://cdn.tailwindcss.com)
-5. Inline ALL styles — no external local file imports
-6. Use CSS animations and transitions freely to make slides visually engaging
-7. Make slides visually stunning with rich colors, gradients, and modern design
-8. Each slide should look like a professional presentation slide
+4. Call get_design_config before generating slides to get the available CSS libraries and the user's preference. Use the library specified (or choose the best fit if set to 'auto').
+5. You may ALWAYS additionally include: Chart.js (https://cdn.jsdelivr.net/npm/chart.js), Three.js (https://cdn.jsdelivr.net/npm/three), anime.js (https://cdn.jsdelivr.net/npm/animejs) for data and animation.
+6. Inline ALL styles — no external local file imports
+7. Use CSS animations and transitions freely to make slides visually engaging
+8. Make slides visually stunning with rich colors, gradients, and modern design
+9. Each slide should look like a professional presentation slide
+
+Accessibility — make slides usable for everyone:
+- Use semantic HTML elements: <h1>, <h2>, <p>, <ul>, <ol>, <figure>, <figcaption>, <section>, <article>
+- Ensure text has sufficient contrast against its background (WCAG AA: 4.5:1 for normal text)
+- Add alt attributes to all <img> elements
+- Do not rely on color alone to convey meaning — use text labels or patterns too
+- Prefer readable font sizes (minimum 18px for body text in slides)
 
 When asked to create a presentation:
-1. First call create_presentation to create it
-2. Then call add_slide for each slide
-3. After generating ALL slides, call finish() to signal completion
+1. Call get_design_config to check the preferred library
+2. Call create_presentation to create it
+3. Call add_slide for each slide, using the chosen library's CDN tag in <head>
+4. After generating ALL slides, call finish() to signal completion
 
 When editing existing presentations, use update_slide, delete_slide, or reorder_slides as needed, then call finish().`
 
@@ -115,6 +126,14 @@ const tools: FunctionDeclaration[] = [
   {
     name: 'list_presentations',
     description: 'List all presentations',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {},
+    },
+  },
+  {
+    name: 'get_design_config',
+    description: 'Get the user\'s preferred CSS library and the full catalog of available libraries with their CDN tags. Call this before generating slides.',
     parameters: {
       type: SchemaType.OBJECT,
       properties: {},
@@ -216,6 +235,18 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
     case 'list_presentations': {
       const presentations = await listPresentations()
       return presentations.map(p => ({ id: p.id, title: p.title, slideCount: p.slides.length, createdAt: p.createdAt }))
+    }
+
+    case 'get_design_config': {
+      const config = await getDesignConfig()
+      return {
+        currentLibrary: config.library,
+        instructions:
+          config.library === 'auto'
+            ? 'Choose the most appropriate library for the slide content and design.'
+            : `Use the "${config.library}" library. Include its CDN tag in every slide's <head>.`,
+        availableLibraries: LIBRARY_CATALOG,
+      }
     }
 
     case 'finish': {
