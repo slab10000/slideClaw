@@ -1,0 +1,15 @@
+{
+  "name": "@slideclaw/openclaw-plugin",
+  "version": "0.1.0",
+  "description": "OpenClaw plugin for slideClaw — lets OpenClaw's AI agent create and manage presentations",
+  "openclaw": {
+    "extensions": ["./src/index.ts"]
+  },
+  "config": {
+    "slideclaw.serverUrl": {
+      "type": "string",
+      "default": "http://localhost:3001",
+      "description": "URL of the slideClaw server"
+    }
+  }
+}

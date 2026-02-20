@@ -1,0 +1,15 @@
+{
+  "name": "slideclaw",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AI-powered local-first presentation tool",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter @slideclaw/server dev\" \"pnpm --filter @slideclaw/web dev\"",
+    "build": "pnpm --filter @slideclaw/core build && pnpm --filter @slideclaw/server build && pnpm --filter @slideclaw/web build && pnpm --filter @slideclaw/cli build",
+    "lint": "pnpm -r lint"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
+  }
+}
